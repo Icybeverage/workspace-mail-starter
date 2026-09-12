@@ -442,3 +442,6 @@ button.card:hover { border-color: #2c4479; }
 @media(prefers-reduced-motion:reduce){.investigation-step,.investigation-outcome{animation:none}.investigation-node{transition:none}}
 
 .graph-wrap--friendly .dim { opacity: .78; }
+
+/* Optical alignment with the wordmark. */
+.brand .pixel-cloud{transform:translateY(-4px)}
