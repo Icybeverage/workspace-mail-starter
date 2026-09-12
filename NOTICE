@@ -1,0 +1,7 @@
+This repository packages original application and verification code as a white-label starter. It does not redistribute the underlying mail server, webmail application, calendar/files server, Qoder, or Neo4j.
+
+The mail-admin HTTP adapter was originally developed against the Mail-in-a-Box admin API. Renaming the adapter does not make it compatible with arbitrary mail providers; implement and verify the documented contract for your chosen backend. Upstream brands are not part of the starter's product interface.
+
+Third-party npm dependencies retain their respective licenses and notices, distributed in their packages and identified by package-lock.json. Separately installed services retain their own licenses and attribution requirements. Preserve those notices when distributing a complete stack.
+
+Original application source is distributed under the MIT License in LICENSE. This license does not relicense separately distributed dependencies or services.

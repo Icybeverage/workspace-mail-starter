@@ -1,0 +1,15 @@
+node_modules/
+client/dist/
+.env
+.env.*
+!.env.example
+data/
+review/
+secrets/
+*.sqlite*
+*.pem
+*.key
+*.log
+.DS_Store
+.qoder/sessions/
+.qoder/history/

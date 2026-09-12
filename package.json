@@ -1,0 +1,35 @@
+{
+  "name": "workspace-mail-starter",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "White-label business email onboarding and operations workspace with Neo4j context and Qoder task handoff",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "vite build --config client/vite.config.js",
+    "start": "node server/index.js",
+    "test": "node --test --test-reporter=tap tests/*.test.js",
+    "verify": "node scripts/harness/run.js",
+    "demo": "node scripts/demo.mjs",
+    "privacy:check": "node scripts/privacy-check.mjs"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.2.1",
+    "fast-xml-parser": "^5.11.1",
+    "imapflow": "^2.0.2",
+    "mailparser": "^3.9.26",
+    "neo4j-driver": "^6.2.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.1",
+    "playwright": "^1.63.0",
+    "vite": "^8.3.0"
+  },
+  "license": "MIT"
+}

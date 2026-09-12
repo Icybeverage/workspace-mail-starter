@@ -1,0 +1,8 @@
+.git
+node_modules
+.env
+.env.*
+secrets
+data
+review
+client/dist
