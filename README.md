@@ -8,7 +8,7 @@ The app connects to an existing mail server and calendar/file services. Those se
 
 ## Try it locally
 
-Requires Node.js 22.12+ and npm.
+Requires Node.js 22.12+, npm, and Git. See [software and services](docs/REQUIREMENTS.md) for installation links and deployment dependencies.
 
 ```sh
 git clone https://github.com/Icybeverage/workspace-mail-starter.git

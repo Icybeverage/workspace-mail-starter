@@ -2,6 +2,8 @@
 
 You need a compatible mail server, HTTPS, and persistent storage for the application database. Calendar and file access also require the DAV endpoints described in [Mail server](MAIL_PROVIDER.md).
 
+Review the [software and service requirements](REQUIREMENTS.md) before provisioning your host.
+
 ## Configure
 
 ```sh
