@@ -1,6 +1,11 @@
 # Develop with Qoder
 
-Open the repository in Qoder IDE and run the [local demo](../README.md#try-it-locally). Project context is in [`.qoder/rules/workspace.md`](../.qoder/rules/workspace.md).
+1. Install Qoder using the [software requirements guide](REQUIREMENTS.md) and sign in.
+2. Open the `workspace-mail-starter` folder in Qoder IDE.
+3. Run the [local demo](../README.md#try-it-locally) in its terminal to inspect the app before editing. Project rules are in [`.qoder/rules/workspace.md`](../.qoder/rules/workspace.md).
+4. Stop the demo with `Ctrl+C` before starting the verification harness. Rebuild and restart the demo to inspect later changes.
+
+For development with real providers, complete [configuration](DEPLOYMENT.md#2-configure-the-app), then run `APP_ORIGIN=http://localhost:5173 npm run dev`. Open `http://localhost:5173/launch/`; the API runs on port 3210. This mode uses your configured services.
 
 ## Start with a small change
 

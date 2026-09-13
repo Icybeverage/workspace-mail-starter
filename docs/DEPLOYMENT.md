@@ -1,10 +1,21 @@
-# Deployment
+# Deploy Workspace Mail
 
-You need a compatible mail server, HTTPS, and persistent storage for the application database. Calendar and file access also require the DAV endpoints described in [Mail server](MAIL_PROVIDER.md).
+Run commands from the repository root in a POSIX shell. If you have not downloaded the project, start with the [README](../README.md#try-it-locally).
 
-Review the [software and service requirements](REQUIREMENTS.md) before provisioning your host.
+## 1. Prepare the services
 
-## Configure
+Install or provision the components in [Software and services](REQUIREMENTS.md). Before configuring this app, have these ready:
+
+- A mail-server administration URL and administrator credentials matching the [provider contract](MAIL_PROVIDER.md).
+- A domain you control, with access to its DNS records.
+- Webmail at `/mail/` and calendar/files at `/cloud/`, on the same public host as the workspace.
+- An HTTPS reverse proxy and a persistent directory writable by the application service account.
+
+Confirm that the provider’s own inbox works first. This app connects to those services; running it does not install a mail server.
+
+## 2. Configure the app
+
+For a new checkout:
 
 ```sh
 npm ci
@@ -12,51 +23,73 @@ cp .env.example .env
 chmod 600 .env
 ```
 
-Set these values in `.env`:
+If `.env` already exists, edit it instead of copying over it. Replace the example values with your own:
 
-| Setting | Purpose |
+| Setting | Enter |
 | --- | --- |
-| `MAIL_SERVER_BASE_URL` | Mail administration API, including its `/admin` prefix |
-| `MAIL_SERVER_USERNAME`, `MAIL_SERVER_PASSWORD` | Server-side API credentials |
-| `MAIL_SERVER_MAIL_HOST` | Mail host used for IMAP and DNS planning |
-| `HOSTED_DOMAIN` | Domain offered during mailbox signup |
-| `APP_ORIGIN` | Browser origin, such as `https://mail.example.test` |
-| `DATA_DIR` | Persistent directory for SQLite; defaults to `data/` |
-| `VAULT_KEY` | 32-byte key used to encrypt stored DNS credentials |
+| `MAIL_SERVER_BASE_URL` | Administration URL, including `/admin` |
+| `MAIL_SERVER_USERNAME`, `MAIL_SERVER_PASSWORD` | Mail-server administrator credentials |
+| `MAIL_SERVER_MAIL_HOST` | Hostname used for IMAP and the mail exchanger |
+| `HOSTED_DOMAIN` | Domain offered when users create a mailbox |
+| `APP_ORIGIN` | Public HTTPS origin, such as `https://mail.example.test`, without `/launch/` |
+| `BASE_PATH` | Keep `/launch` for the standard setup |
+| `DATA_DIR` | Persistent database directory; defaults to `data/` in this checkout |
 
-Generate the vault key with `openssl rand -hex 32`. Keep a secure backup with the database: changing the key prevents the app from decrypting existing credentials.
-
-The remaining settings, including provisioning limits and optional relay/LLM credentials, are documented in [`.env.example`](../.env.example). See [Neo4j](NEO4J.md) to enable the graph.
-
-## Build and run
-
-With the default `/launch` path:
+For automated Cloudflare DNS changes, generate a vault key:
 
 ```sh
-npm run build
+openssl rand -hex 32
+```
+
+Paste the output into `VAULT_KEY` in `.env`. Back up this key with the database; replacing it makes previously encrypted credentials unreadable.
+
+Review mailbox limits and reserved names in [`.env.example`](../.env.example). Configure optional relay or model settings only if you use those services.
+
+## 3. Connect Neo4j
+
+Follow [Neo4j setup](NEO4J.md) to use a local database or Aura, then put its URI, username, and password in `.env`. Skip this step if you do not need graph features; the UI will report the graph as unavailable.
+
+## 4. Build and start
+
+Build with your chosen wordmark:
+
+```sh
+BASE_PATH=/launch VITE_BRAND_NAME='Your Business Mail' npm run build
 NODE_ENV=production npm start
 ```
 
-The server loads `.env`. Vite’s production build reads `BASE_PATH` from the shell, so pass it explicitly if you use a different prefix:
+The API listens on `127.0.0.1:3210` by default. Configure your HTTPS reverse proxy to forward `/launch/` to that address **without stripping the prefix**. Then open `https://YOUR_HOST/launch/`.
+
+Once the foreground startup works, run the same start command under your host’s service manager with `NODE_ENV=production`, the repository as its working directory, and a dedicated service account. Keep the default loopback binding when the proxy is on the same machine.
+
+For a different URL prefix, use the same `BASE_PATH` in `.env`, the build command, and the reverse proxy. Production builds read `BASE_PATH` and `VITE_BRAND_NAME` from the shell; editing `.env` alone does not update the built client.
+
+## 5. Verify a test mailbox
+
+1. Create an application account and a mailbox on your hosted domain. The application login and mailbox password are separate credentials.
+2. Open the inbox and sign in with the full mailbox address and its password.
+3. Confirm MX, SPF, DKIM, DMARC, TLS, reverse DNS, and any relay settings on the mail server. Send a test email to an external address you control, reply, and confirm both messages arrive.
+4. Open Calendar, save an event, and reopen it. Upload a small file in Files, download it, and check storage usage in the workspace.
+5. If Neo4j is enabled, sync workspace resources and inspect the relationship view.
+6. For custom domains, add a domain, verify ownership, apply its DNS plan, and repeat the delivery check after creating its first mailbox.
+
+Before opening signup to others, verify account isolation and restore a database backup in staging. Monitor mail queues and disk usage on the mail server. Passing DNS checks does not confirm message delivery.
+
+## 6. Run the harness
+
+Install Chromium and run the fixture checks:
 
 ```sh
-BASE_PATH=/workspace npm run build
+npx playwright install chromium
+npm run verify
 ```
 
-Set the same `BASE_PATH` in `.env`. Run the server as a dedicated service account behind an HTTPS reverse proxy, forwarding the prefix to port 3210. Keep the default loopback binding when the proxy runs on the same host.
-
-## Before opening signup
-
-Configure MX, SPF, DKIM, DMARC, TLS, reverse DNS, and your outbound relay on the mail infrastructure. Test delivery in both directions; DNS checks alone cannot confirm receipt.
-
-Review `MAILBOX_LIMIT_PER_ACCOUNT`, `GLOBAL_MAILBOX_CAP`, reserved names, and rate limits. Test calendar/file access, tenant isolation, database restoration, and vault-key recovery. Mail queues and disk usage need monitoring on the mail server itself.
-
-## Check a running deployment
-
-The default `npm run verify` uses fake providers. To add read-only checks against your deployment:
+For additional checks against your running deployment:
 
 ```sh
 LIVE_ALLOWED_HOST=mail.example.test node scripts/harness/run.js --live https://mail.example.test/launch/
 ```
 
-Replace the example host in both places. For authenticated checks, supply `WORKSPACE_TEST_EMAIL` and `WORKSPACE_TEST_PASSWORD` through the environment. The live harness is restricted to `/launch`, approved read paths, and the login request. Keep its reports private.
+Replace both example hosts with your public hostname. Supply `WORKSPACE_TEST_EMAIL` and `WORKSPACE_TEST_PASSWORD` through the environment for authenticated checks, using the test application account. The live harness supports `/launch` and restricts requests to approved read paths and login.
+
+Review the results and screenshots in `review/harness/`. Keep live reports private. Fixture checks use simulated providers; they do not replace the delivery test above.

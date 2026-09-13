@@ -11,7 +11,28 @@ The operations agent reads the setup graph to explain problems. The workspace vi
 
 ## Connect a database
 
-Set these values in the application’s `.env`:
+Choose a local database or Aura. Both connect through the same three application settings.
+
+### Local database
+
+1. Install Docker and Compose from [Software and services](REQUIREMENTS.md).
+2. From the repository root, prepare the secret file:
+
+```sh
+mkdir -p secrets
+touch secrets/neo4j_auth.txt
+chmod 600 secrets/neo4j_auth.txt
+```
+
+3. Open that file in your editor and enter `neo4j/` followed by a strong password on one line. Keep the password for the application configuration.
+4. Start the database:
+
+```sh
+docker compose up -d neo4j
+docker compose ps neo4j
+```
+
+5. Add the connection settings to the application’s `.env`, filling in the same password:
 
 ```dotenv
 NEO4J_URI=neo4j://127.0.0.1:7687
@@ -19,17 +40,15 @@ NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=
 ```
 
-Fill in the password locally. For Aura, use the instance’s `neo4j+s://` URI and credentials.
+The Compose file starts Neo4j only, binds its ports to loopback, and persists data in a Docker volume. These settings assume the Node app runs on that same host. See the [Neo4j Compose guide](https://neo4j.com/docs/operations-manual/current/docker/docker-compose-standalone/) for administration details.
 
-To run the included local database configuration, create `secrets/neo4j_auth.txt` containing `neo4j/` followed by your password, restrict the file to your user, and start it:
+### Aura
 
-```sh
-docker compose up -d neo4j
-```
+Create an Aura instance using the link in [Software and services](REQUIREMENTS.md). Copy its `neo4j+s://` URI, username, and password into `NEO4J_URI`, `NEO4J_USERNAME`, and `NEO4J_PASSWORD` in `.env`. You do not need local Docker for Aura.
 
-The Compose file starts Neo4j only, binds its ports to loopback, and persists data in a Docker volume. It reads the password through a mounted secret. See the [Neo4j Compose guide](https://neo4j.com/docs/operations-manual/current/docker/docker-compose-standalone/) for administration details.
+### Verify the connection
 
-Restart the application after changing its connection settings. Sync workspace resources from the UI to populate email, calendar, and file context. Without a configured database, the app reports the graph as unavailable; the local fixture demo uses this mode.
+Restart the application after saving `.env`. Open Workspace and sync resources from a test mailbox to populate email, calendar, and file context. If the graph remains unavailable, check the database status and connection settings. The fixture demo deliberately leaves Neo4j unconfigured; use the normal app for this check.
 
 ## Extend the graph
 

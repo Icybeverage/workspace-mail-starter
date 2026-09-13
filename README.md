@@ -8,7 +8,8 @@ The app connects to an existing mail server and calendar/file services. Those se
 
 ## Try it locally
 
-Requires Node.js 22.12+, npm, and Git. See [software and services](docs/REQUIREMENTS.md) for installation links and deployment dependencies.
+1. Install Node.js 22.12+ with npm and Git from the [software requirements guide](docs/REQUIREMENTS.md).
+2. In a terminal, download the project and start the demo:
 
 ```sh
 git clone https://github.com/Icybeverage/workspace-mail-starter.git
@@ -18,7 +19,10 @@ npm run build
 npm run demo
 ```
 
-Open the URL printed in the terminal and create an account. The demo uses simulated mail and DNS services and a temporary database. Data is removed when you stop it. No provider credentials are needed.
+3. Open the URL printed in the terminal and create a demo account. Explore mailbox creation and domain setup using sample details.
+4. Press `Ctrl+C` in the terminal when finished. This removes the temporary demo database.
+
+Mail and DNS are simulated, no email is sent, and Neo4j is unavailable in this mode. To use real services, follow the deployment steps below.
 
 ## What’s included
 
@@ -30,9 +34,15 @@ Open the URL printed in the terminal and create an account. The demo uses simula
 
 ## Set up your deployment
 
-Start with the [deployment guide](docs/DEPLOYMENT.md). The integration details are in [Mail server](docs/MAIL_PROVIDER.md) and [Neo4j](docs/NEO4J.md).
+Follow the [deployment guide](docs/DEPLOYMENT.md) in order:
 
-For development with your own providers, copy [`.env.example`](.env.example) to `.env`, fill in the settings, and run `npm run dev`. The API defaults to port 3210; Vite serves the client on port 5173 under `/launch/`.
+1. Prepare your mail server, inbox, calendar, and file services.
+2. Create `.env` and enter your domain and provider settings.
+3. Connect Neo4j if you want relationship views.
+4. Build the app and serve it behind HTTPS.
+5. Create a test mailbox and verify delivery, calendar, and file access.
+
+For changes in Qoder, use the [development guide](docs/BUILD_WITH_QODER.md).
 
 ## Customize the brand
 
