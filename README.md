@@ -1,51 +1,67 @@
 # Workspace Mail
 
-A white-label starting point for self-hosted business email onboarding and operations. Connect a mail server, let users register and provision an address within operator limits, onboard verified custom domains, and connect email, calendar, and file context through Neo4j.
+Self-service business email on infrastructure you control.
 
-The application includes a dark React workspace, mailbox storage usage, domain diagnostics, a read-only operations investigation, readable relationship graphs, and a reviewed Markdown handoff to Qoder. It supports operating email for your own organization or providing a managed service to customers.
+Workspace Mail handles account signup, mailbox provisioning, custom-domain setup, and storage usage. It connects email, calendar, and file context through Neo4j, and exports task briefs you can take into Qoder.
 
-## Run the local demo
+The app connects to an existing mail server and calendar/file services. Those services supply the inbox, delivery, and storage; this repo contains the onboarding and operations workspace.
 
-Requires Node.js 22.12+ or a newer supported LTS and npm.
+## Try it locally
+
+Requires Node.js 22.12+ and npm.
 
 ```sh
+git clone https://github.com/Icybeverage/workspace-mail-starter.git
+cd workspace-mail-starter
 npm ci
 npm run build
 npm run demo
 ```
 
-Open the local URL printed by the command and create a demo account. This mode uses an isolated temporary database and simulated mail/DNS providers. It does not send email, connect to a real calendar, or persist data after shutdown. Neo4j is intentionally unavailable in fixture mode, and the UI says so.
+Open the URL printed in the terminal and create an account. The demo uses simulated mail and DNS services and a temporary database. Data is removed when you stop it. No provider credentials are needed.
 
-## Verify the project
+## What’s included
 
-```sh
-npx playwright install chromium
-npm run verify
-npm run privacy:check
-```
+- Signup and mailbox creation, with reserved addresses and provisioning limits.
+- Domain ownership verification, DNS planning, and setup diagnostics.
+- Mailbox usage and links to your mail, calendar, and file portals.
+- Neo4j dependency graphs for domains and mailboxes, plus email/task/meeting/file context.
+- A browser-generated task brief for manual handoff to Qoder.
 
-The harness runs unit tests, builds the app, starts the fixture server, and checks the real UI in standalone Chromium at desktop and mobile widths. Reports are written under ignored `review/harness/`. These checks do not prove real email delivery or a live Neo4j deployment.
+## Set up your deployment
 
-## Connect your infrastructure
+Start with the [deployment guide](docs/DEPLOYMENT.md). The integration details are in [Mail server](docs/MAIL_PROVIDER.md) and [Neo4j](docs/NEO4J.md).
 
-Read [the deployment guide](docs/DEPLOYMENT.md), [mail provider contract](docs/MAIL_PROVIDER.md), and [Neo4j guide](docs/NEO4J.md). This repository is the onboarding and operations application. A separately operated SMTP/IMAP server and compatible calendar/file portals provide the underlying services. Neo4j stores relationships, not mailboxes.
+For development with your own providers, copy [`.env.example`](.env.example) to `.env`, fill in the settings, and run `npm run dev`. The API defaults to port 3210; Vite serves the client on port 5173 under `/launch/`.
 
-Copy `.env.example` to `.env` and fill in values locally. The app runs without optional Neo4j and language-model credentials, with explicitly unavailable or rule-based states. Do not deploy with example domains or test credentials.
-
-## Build with Qoder
-
-Open this folder in Qoder IDE, read [the build workflow](docs/BUILD_WITH_QODER.md), and run the verification harness after each meaningful change. The included project rules describe architecture, privacy boundaries, and verification. [Email-to-Qoder handoff](docs/QODER_HANDOFF.md) exports a brief for review and manual attachment; it is not an automatic agent API.
-
-## White-label
+## Customize the brand
 
 ```sh
 VITE_BRAND_NAME='Your Business Mail' npm run build
 ```
 
-The wordmark and task-brief brand follow this build setting. Replace the pixel-cloud SVG in `client/src/components/Bits.jsx`, edit the document title in `client/index.html`, and tune color/spacing tokens in `client/src/styles.css`. Set your hosted domain and provider endpoints through environment configuration.
+This sets the wordmark and task-brief title. The logo is in [`Bits.jsx`](client/src/components/Bits.jsx), the page title in [`client/index.html`](client/index.html), and the theme in [`styles.css`](client/src/styles.css).
 
-## Release boundaries
+## Work on the code
 
-This is a source starter, not a turnkey managed email service. You operate delivery, abuse prevention, backups, TLS, monitoring, retention, billing, and customer support. Provisioning caps and reserved names are included. Review the deployment checklist before opening public signup.
+| Location | Responsibility |
+| --- | --- |
+| `client/src/` | React pages, graph views, task-brief export |
+| `server/routes/` | HTTP endpoints and access checks |
+| `server/services/` | Mail, DNS, graph, and workspace integrations |
+| `server/lib/` | Configuration, sessions, database, encryption |
+| `scripts/harness/` | Test runner and Chromium checks |
+| `tests/` | Unit and integration tests with fake providers |
 
-No deployment credentials, private endpoints, user mailbox content, browser sessions, original Git history, or production media are included. See [NOTICE](NOTICE) for source provenance and third-party licensing.
+The [Qoder guide](docs/BUILD_WITH_QODER.md) covers the development workflow. [Task briefs](docs/QODER_HANDOFF.md) explains the email-to-Qoder handoff.
+
+```sh
+npx playwright install chromium
+npm run verify
+```
+
+The harness runs tests, builds the app, and checks the UI at desktop and mobile widths. Reports go to `review/harness/`. See [CONTRIBUTING.md](CONTRIBUTING.md) for change and verification guidelines.
+
+## License
+
+[MIT](LICENSE). Third-party service and dependency notices are in [NOTICE](NOTICE).

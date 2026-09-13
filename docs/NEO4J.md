@@ -1,25 +1,38 @@
-# Neo4j relationship layer
+# Neo4j
 
-SQLite is the application's source of truth. Neo4j projects tenant-scoped domain/DNS/mailbox relationships and email/calendar/file context for queries and visual exploration. It never hosts SMTP or stores the mailbox as a mail server.
+SQLite stores application state. Neo4j holds a tenant-scoped projection used for dependency queries and relationship views.
 
-## Local Neo4j or Aura
+There are two main graphs:
 
-For a local instance, install Docker, create `secrets/neo4j_auth.txt` containing `neo4j/` followed by a strong unique password, and restrict it to your user. That directory is ignored by Git. Then run:
+- **Setup:** domains, DNS records, checks, and affected mailboxes.
+- **Workspace:** emails, suggested tasks, meetings, and files.
+
+The operations agent reads the setup graph to explain problems. The workspace view uses the second graph to surface context around a message. Suggested links retain their confidence and source information.
+
+## Connect a database
+
+Set these values in the application’s `.env`:
+
+```dotenv
+NEO4J_URI=neo4j://127.0.0.1:7687
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=
+```
+
+Fill in the password locally. For Aura, use the instance’s `neo4j+s://` URI and credentials.
+
+To run the included local database configuration, create `secrets/neo4j_auth.txt` containing `neo4j/` followed by your password, restrict the file to your user, and start it:
 
 ```sh
 docker compose up -d neo4j
 ```
 
-Set `NEO4J_URI=neo4j://127.0.0.1:7687`, `NEO4J_USERNAME=neo4j`, and your password in the ignored application `.env`. For Aura, use the instance's `neo4j+s://` URI and credentials instead. Do not put them in frontend variables.
+The Compose file starts Neo4j only, binds its ports to loopback, and persists data in a Docker volume. It reads the password through a mounted secret. See the [Neo4j Compose guide](https://neo4j.com/docs/operations-manual/current/docker/docker-compose-standalone/) for administration details.
 
-The application initializes the graph service at startup. After connecting real resources, use the workspace sync action to project metadata. The fixture demo deliberately leaves Neo4j unavailable; it cannot demonstrate a real connection.
+Restart the application after changing its connection settings. Sync workspace resources from the UI to populate email, calendar, and file context. Without a configured database, the app reports the graph as unavailable; the local fixture demo uses this mode.
 
-## Understand the graph
+## Extend the graph
 
-Domain, DNS record, mailbox and verification nodes support dependency investigation. Email, suggested task, event and file nodes connect workspace context. The consumer view uses Email / Suggested task / Meeting / File cards. Match confidence remains in the data; a suggested connection is not proof that a meeting or file was explicitly linked by its author.
+Projection and query code lives in [`server/services/graph.js`](../server/services/graph.js). Workspace ingestion is in [`workspace-knowledge.js`](../server/services/workspace-knowledge.js); operational traversal is in [`investigation.js`](../server/services/investigation.js).
 
-All application queries must retain tenant filtering. Do not expose the Neo4j database directly to the browser. The operations agent reads dependencies and explains findings; it does not edit infrastructure.
-
-Review `server/services/graph.js`, `server/services/workspace-knowledge.js`, and `server/services/investigation.js` when extending the graph. Add regressions for another tenant's records and for disconnected Neo4j before shipping a new query.
-
-Official setup reference: [Neo4j Compose with secrets](https://neo4j.com/docs/operations-manual/current/docker/docker-compose-standalone/).
+Preserve tenant filters when adding a query, and cover cross-tenant access and database outages in tests. Database credentials stay on the server.

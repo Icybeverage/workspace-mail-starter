@@ -1,18 +1,26 @@
-# Mail provider contract
+# Mail server integration
 
-`server/services/mailserver.js` implements a specific administrative HTTP contract using server-side Basic authentication and URL-encoded forms. A configured endpoint must implement the contract or be replaced with an adapter for your provider. Changing its hostname is insufficient.
+The adapter in [`server/services/mailserver.js`](../server/services/mailserver.js) uses Basic authentication over HTTPS and URL-encoded forms. Configure it with `MAIL_SERVER_*` in [`.env.example`](../.env.example).
 
-Required operations:
+Your provider must implement this contract, or you will need to replace the adapter.
 
-| Operation | Endpoint | Expected behavior |
+| Operation | Endpoint | Response / behavior |
 | --- | --- | --- |
-| List mailboxes/usage | GET `/mail/users?format=json` | Flat or domain-grouped users with email, privileges, quota and usage fields |
-| Create mailbox | POST `/mail/users/add` | Accept `email`, `password`, and optional `quota`; return success only after creation |
-| Read DNS suggestions | GET `/dns/dump?format=json` | DNS record groups used by domain planning |
-| List zones | GET `/dns/zones?format=json` | Domains known to the mail server |
+| List mailboxes | GET `/mail/users?format=json` | Flat users or domain groups, including email and quota/usage fields |
+| Create mailbox | POST `/mail/users/add` | Accept `email`, `password`, `privileges`, and `quota` |
+| Read DNS suggestions | GET `/dns/dump?format=json` | DNS record groups for domain planning |
+| List zones | GET `/dns/zones?format=json` | Domains known to the server |
 
-See the adapter and `tests/helpers.js` for exact normalization and fixtures. Calendar/files connectors expect the server's compatible DAV and portal paths; see `server/services/workspace-knowledge.js`. Validate these paths and authentication against your installation.
+New mailboxes request a `512M` quota and no administrator privileges. The adapter expects the first mailbox on a domain to trigger DKIM/DNS generation. Malformed user-list responses are treated as unavailable, so provisioning cannot mistake a failed lookup for an unused address.
 
-Run your SMTP/IMAP service and portals separately, set `MAIL_SERVER_BASE_URL`, username/password, mail host and `HOSTED_DOMAIN`. Configure MX, SPF, DKIM, DMARC, TLS, reverse DNS and any outbound relay with your infrastructure provider. Verify actual inbound and outbound delivery with an explicitly authorized test. A successful DNS check alone is not delivery proof.
+[`tests/helpers.js`](../tests/helpers.js) provides provider fixtures. Normalization and failure cases are covered in the mailbox and diagnostics tests.
 
-Public signup provisions real mailboxes when a real adapter is configured. Set per-account/global caps, reserved names, rate limits, and an abuse response process before exposing it. Operator credentials never belong in browser configuration or Qoder chat.
+## Calendar and files
+
+[`workspace-knowledge.js`](../server/services/workspace-knowledge.js) reads:
+
+- IMAP over TLS on port 993, using the mailbox credentials.
+- Calendars at `/cloud/remote.php/dav/calendars/{user}/`.
+- Files at `/cloud/remote.php/dav/files/{user}/`.
+
+DAV requests use the same origin as the configured mail administration URL. A provider with different paths or authentication needs a connector change. SMTP delivery and the webmail/calendar/file interfaces run separately from this application.
