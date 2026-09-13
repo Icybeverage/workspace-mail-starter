@@ -13,3 +13,5 @@ qodercli --attachment qoder-task.md
 Copying or downloading does not send anything to Qoder. The brief asks for a plan first and requires a separate instruction before sending mail, changing DNS, or deploying.
 
 The exporter is [`client/src/qoderBrief.js`](../client/src/qoderBrief.js). It follows existing graph edges, limits the number of related items and text length, and escapes Markdown fences in the JSON context. Regression coverage is in [`tests/qoder-brief.test.js`](../tests/qoder-brief.test.js).
+
+References: [Qoder CLI](https://docs.qoder.com/cli/cli-reference), [IDE file context](https://docs.qoder.com/user-guide/chat/context).

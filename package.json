@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "White-label business email onboarding and operations workspace with Neo4j context and Qoder task handoff",
+  "description": "Self-service mailbox provisioning, domain setup, and Neo4j workspace context",
   "engines": {
     "node": ">=22.12.0"
   },

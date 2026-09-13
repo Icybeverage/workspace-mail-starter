@@ -27,16 +27,6 @@ Open the generated report in `review/harness/` to check both the results and scr
 | Workspace UI | `client/src/components/WorkspaceKnowledge.jsx` |
 | Verification harness | `scripts/harness/run.js` |
 
-Qoder contributed the diagnostics and verification harness in the original project. These entry points let you continue that work in your own deployment.
-
 ## Work from an email
 
-Download a reviewed [task brief](QODER_HANDOFF.md), then attach it in Qoder IDE with `@qoder-task.md`, or use the CLI:
-
-```sh
-qodercli --attachment qoder-task.md
-```
-
-Keep mailbox content and private briefs out of Git. The brief asks Qoder for a plan before making changes.
-
-References: [Qoder CLI](https://docs.qoder.com/cli/cli-reference), [IDE file context](https://docs.qoder.com/user-guide/chat/context).
+Use the [email-to-Qoder guide](QODER_HANDOFF.md) to export workspace context and attach it in the IDE or CLI.

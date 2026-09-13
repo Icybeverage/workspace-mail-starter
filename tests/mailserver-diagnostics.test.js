@@ -79,7 +79,7 @@ test('normalizeMailServerUsers rejects invalid entries and users instead of drop
   }
 });
 
-test('listUsers maps grouped users with the Qoder Workspace storage fields intact', async () => {
+test('listUsers maps grouped users with storage fields intact', async () => {
   const mailserver = mailserverClientWithBody(JSON.stringify(GROUPED_LISTING));
   const res = await mailserver.listUsers();
   assert.equal(res.ok, true, JSON.stringify(res));
